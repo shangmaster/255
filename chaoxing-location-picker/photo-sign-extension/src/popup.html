@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>学习通拍照签到</title>
+  <style>
+    body { width: 300px; margin: 0; padding: 12px; font-family: -apple-system, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif; font-size: 13px; color: #1b1f24; }
+    h1 { margin: 0 0 4px; font-size: 15px; }
+    .sub { font-size: 11px; color: #6b7787; margin-bottom: 10px; }
+    .status { font-size: 12px; padding: 8px; border-radius: 7px; background: #f2f5fa; white-space: pre-wrap; word-break: break-all; min-height: 34px; }
+    .status.ok { background: #e6f7ed; color: #12683c; }
+    .status.err { background: #fdecec; color: #a3241f; }
+    .row { display: flex; gap: 8px; margin-top: 10px; }
+    button { flex: 1; padding: 7px 10px; border: none; border-radius: 7px; background: #ece7fb; color: #2c2350; cursor: pointer; font-size: 12px; }
+    button:hover { background: #ded5f8; }
+    button.primary { background: #7a5af8; color: #fff; font-weight: 600; }
+    button.primary:hover { background: #6a4ae0; }
+    .tip { font-size: 11px; color: #6b7787; margin-top: 10px; line-height: 1.6; }
+    a { color: #7a5af8; }
+  </style>
+</head>
+<body>
+  <h1>拍照签到（本地图片）</h1>
+  <div class="sub">在学习通页面上选一张本地图片提交拍照签到</div>
+
+  <div class="status" id="status">正在读取当前页面…</div>
+
+  <div class="row">
+    <button class="primary" id="openPanel">在当前页面打开面板</button>
+  </div>
+  <div class="row">
+    <button id="openOptions">设置</button>
+  </div>
+
+  <div class="tip">
+    用法：在学习通课程页面点右下角紫色按钮 → 选图片（或拖进去 / Ctrl+V）→ 点「提交拍照签到」。<br />
+    签到编号会自动获取，不用手填。
+  </div>
+
+  <script src="lib.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

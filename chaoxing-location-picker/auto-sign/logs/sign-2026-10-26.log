@@ -1,0 +1,2 @@
+[00:59:53] [err] ✗ cookie 已失效（服务端返回的是登录页）—— 请重新导出 cookies.json
+[00:59:53] [warn] 课表里没解析出课程；可以手填 config.json 的 courses（含 course_id / class_id）

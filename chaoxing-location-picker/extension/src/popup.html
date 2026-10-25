@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>学习通自由选点签到</title>
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; width: 360px; font: 13px/1.5 -apple-system, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif; color: #1b1f24; background: #fff; }
+    header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #f5f7fb; border-bottom: 1px solid #e3e8f0; }
+    header b { font-size: 14px; flex: 1; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #c9d1dc; }
+    .dot.on { background: #1f9d55; }
+    .box { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .coords { font-variant-numeric: tabular-nums; background: #f2f5fa; border-radius: 8px; padding: 9px 10px; line-height: 1.7; }
+    .coords b { font-size: 14px; }
+    .muted { color: #6b7787; font-size: 12px; }
+    label.row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    input[type=text], select { width: 100%; padding: 6px 8px; border: 1px solid #cfd7e3; border-radius: 6px; font-size: 12px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    button { border: none; border-radius: 7px; padding: 8px 10px; font-size: 13px; cursor: pointer; background: #e9eef7; color: #22303f; }
+    button:hover { background: #dde5f3; }
+    button.primary { background: #2f6fed; color: #fff; font-weight: 600; }
+    button.primary:hover { background: #265fd0; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .status { font-size: 12px; color: #33415c; background: #f2f5fa; border-radius: 7px; padding: 8px 9px; white-space: pre-wrap; word-break: break-all; max-height: 120px; overflow: auto; }
+    .status.ok { background: #e6f7ed; color: #12683c; }
+    .status.err { background: #fdecec; color: #a3241f; }
+    .warn { font-size: 11px; color: #8a5a00; background: #fff6e5; border-radius: 7px; padding: 7px 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="dot" id="dot"></span>
+    <b>自由选点签到</b>
+    <span class="muted" id="ver"></span>
+  </header>
+
+  <div class="box">
+    <div class="coords">
+      <div><b id="coord">尚未选点</b></div>
+      <div class="muted" id="addr">在目标页面点右下角的圆形按钮，用地图选点</div>
+    </div>
+
+    <label class="row"><input type="checkbox" id="enabled" /> 启用坐标伪装（网页定位一律返回选点）</label>
+
+    <div class="grid">
+      <button class="primary" id="openPicker">在当前页面选点</button>
+      <button id="clearPoint">清除选点</button>
+    </div>
+
+    <div>
+      <div class="muted" style="margin-bottom:4px;">快速手填坐标（纬度, 经度）</div>
+      <input type="text" id="manual" placeholder="30.123456, 120.123456" />
+      <div class="grid" style="margin-top:6px;">
+        <select id="datum">
+          <option value="gcj02">GCJ-02 高德/腾讯</option>
+          <option value="wgs84">WGS-84 原始 GPS</option>
+          <option value="bd09">BD-09 百度</option>
+        </select>
+        <button id="applyManual">应用</button>
+      </div>
+    </div>
+
+    <div class="status" id="status">就绪</div>
+
+    <div>
+      <label class="row"><input type="checkbox" id="autoEnabled" /> 自动签到（只做位置签到，按设置里的时段）</label>
+      <div class="muted" id="autoSub" style="margin-top:4px;">读取中…</div>
+    </div>
+
+    <div class="grid">
+      <button id="autoRunNow">立刻跑一轮</button>
+      <button id="openOptions">打开完整设置</button>
+    </div>
+
+    <div class="warn">
+      仅在你自己的账号与设备上使用；定位签到属于考勤行为，请遵守学校规定。
+    </div>
+  </div>
+
+  <script src="lib.js"></script>
+  <script src="auto.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

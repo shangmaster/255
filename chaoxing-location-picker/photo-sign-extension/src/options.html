@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>拍照签到 · 设置</title>
+  <style>
+    body { max-width: 620px; margin: 0 auto; padding: 20px; font-family: -apple-system, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif; font-size: 14px; color: #1b1f24; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .sub { color: #6b7787; font-size: 12px; margin-bottom: 16px; }
+    .card { border: 1px solid #e3e8f0; border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+    .card h2 { font-size: 14px; margin: 0 0 10px; }
+    .row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .row label { min-width: 130px; color: #4a5563; font-size: 13px; }
+    .sw { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #4a5563; }
+    .note { font-size: 12px; color: #6b7787; line-height: 1.7; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    button { padding: 8px 12px; border: none; border-radius: 7px; background: #ece7fb; color: #2c2350; cursor: pointer; font-size: 13px; }
+    button:hover { background: #ded5f8; }
+    button.primary { background: #7a5af8; color: #fff; font-weight: 600; }
+    .status { margin-top: 10px; font-size: 12px; padding: 9px; border-radius: 7px; background: #f2f5fa; white-space: pre-wrap; word-break: break-all; }
+    .status.ok { background: #e6f7ed; color: #12683c; }
+    .status.err { background: #fdecec; color: #a3241f; }
+    .saved { margin-top: 10px; font-size: 12px; color: #12683c; min-height: 16px; }
+  </style>
+</head>
+<body>
+  <h1>拍照签到（本地图片）</h1>
+  <div class="sub">只做一件事：把本地图片提交为学习通的拍照签到。</div>
+
+  <div class="card">
+    <h2>一、基本设置</h2>
+    <div class="row">
+      <label>自动获取 activeId</label>
+      <div class="sw"><input type="checkbox" id="autoDetect" />
+        <span>先看页面自己的请求，再查这门课的活动列表（每 30 秒重试，拿到就停）</span></div>
+    </div>
+    <div class="row">
+      <label>试运行</label>
+      <div class="sw"><input type="checkbox" id="dryRun" /> <span>只打印将要发送的参数，不真正提交</span></div>
+    </div>
+    <div class="row">
+      <label>appType</label>
+      <input type="text" id="appType" style="width:80px;padding:6px 8px;border:1px solid #cfd7e3;border-radius:6px;" />
+      <span class="note">默认 15（网页端），一般不用改</span>
+    </div>
+    <div class="actions"><button class="primary" id="save">保存设置</button></div>
+    <div class="saved" id="saved"></div>
+  </div>
+
+  <div class="card">
+    <h2>二、连通性自检</h2>
+    <div class="actions">
+      <button id="testLogin">检查登录状态</button>
+      <button id="testPan">检查图片上传通道</button>
+    </div>
+    <div class="status" id="testStatus">未检测</div>
+    <div class="note">
+      「检查登录状态」确认浏览器已登录学习通；「检查图片上传通道」确认能拿到网盘上传令牌
+      （拍照签到要先把图片传上去换 objectId）。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>三、它是怎么工作的</h2>
+    <div class="note">
+      1. 面板自动获取这次活动的 <code>activeId</code>（课程活动列表接口，只取"进行中"的）；<br />
+      2. 你选一张本地图片 → 校验格式与大小 → 上传到学习通网盘换回 <code>objectId</code>；<br />
+      3. 用极简参数 + GET 提交 <code>pptSign/stuSignajax</code>：<br />
+      &nbsp;&nbsp;&nbsp;<code>activeId / uid / clientip / latitude(-1) / longitude(-1) / appType / fid / objectId / name</code><br />
+      4. 服务端返回 <code>success</code> 就是签到成功。<br /><br />
+      <b>注意</b>：如果服务端返回 <code>photoAuthError_*</code>，说明这次活动开了拍照校验
+      （要求本机现场拍摄的凭证），网页端拿不到 —— 学习通自己的网页在这种活动上也是直接提示
+      "请使用手机APP"，只能用 APP 完成。
+    </div>
+  </div>
+
+  <script src="lib.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

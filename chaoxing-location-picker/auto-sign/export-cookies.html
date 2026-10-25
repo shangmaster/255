@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>导出学习通登录态 → cookies.json</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin: 0; padding: 32px 18px 60px; background: #f4f6fa; color: #1b1f24;
+         font: 14px/1.7 -apple-system, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  .sub { color: #6b7787; font-size: 13px; margin-bottom: 20px; }
+  .card { background: #fff; border: 1px solid #e3e8f0; border-radius: 12px;
+          padding: 18px 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 15px; margin: 0 0 12px; }
+  ol { margin: 0 0 0 18px; padding: 0; }
+  li { margin-bottom: 8px; }
+  code, textarea { font-family: ui-monospace, Consolas, monospace; }
+  code { background: #f2f5fa; padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+  textarea { width: 100%; height: 190px; box-sizing: border-box; padding: 10px;
+             border: 1px solid #cfd7e3; border-radius: 8px; font-size: 12px; resize: vertical; }
+  button { border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px;
+           cursor: pointer; background: #e9eef7; color: #22303f; margin-right: 8px; }
+  button.primary { background: #2f6fed; color: #fff; font-weight: 600; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .status { margin-top: 12px; font-size: 12.5px; background: #f2f5fa; border-radius: 8px;
+            padding: 10px; white-space: pre-wrap; word-break: break-all; }
+  .status.ok { background: #e6f7ed; color: #12683c; }
+  .status.err { background: #fdecec; color: #a3241f; }
+  .kv { font-size: 12px; color: #6b7787; }
+  .warn { background: #fff6e5; color: #8a5a00; border-radius: 8px; padding: 10px; font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>导出学习通登录态</h1>
+  <div class="sub">
+    自动签到程序跑在浏览器外面，碰不到浏览器的 cookie，所以需要你在<b>已登录</b>的状态下导出一次。<br />
+    导出的内容只保存在你自己电脑的 <code>auto-sign/cookies.json</code> 里，不会发给任何第三方。
+  </div>
+
+  <div class="card">
+    <h2>怎么用（一分钟）</h2>
+    <ol>
+      <li>先在<b>同一个浏览器</b>里打开 <a href="https://i.chaoxing.com/base" target="_blank" rel="noreferrer">i.chaoxing.com</a>
+          并确认已登录；</li>
+      <li>回本页面，按 <code>F12</code> 打开开发者工具 → 切到 <b>Console（控制台）</b>；</li>
+      <li>把下面这段粘进控制台回车（浏览器可能提示"粘贴警告"，输入 <code>allow pasting</code> 再粘）；</li>
+      <li>把打印出来的 <code>cookies.json</code> 文本点「下载」，或复制内容贴到文件里。</li>
+    </ol>
+    <textarea id="snippet" readonly>copy(JSON.stringify(Object.fromEntries(document.cookie.split('; ').map(s=>{const i=s.indexOf('=');return [s.slice(0,i), s.slice(i+1)]})), null, 2))</textarea>
+    <div class="kv" style="margin-top:8px;">
+      注意：<code>document.cookie</code> 读不到 HttpOnly 的 <code>_uid</code>。所以本页会再给你一段
+      「带 _uid 的版本」—— 它需要用下面的书签/secondary 方法从 <code>i.chaoxing.com</code> 页面取。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>需要 _uid 时用这个（推荐，最稳）</h2>
+    <ol>
+      <li>打开 <a href="https://i.chaoxing.com/base" target="_blank" rel="noreferrer">i.chaoxing.com/base</a>；</li>
+      <li>按 <code>F12</code> → <b>Application（应用）</b> → <b>Cookies</b> → <code>https://i.chaoxing.com</code>；</li>
+      <li>找到下面这几个名字，把值抄下来（或截图）：
+        <code>_uid</code>、<code>UID</code>、<code>fid</code>、<code>_d</code>、<code>uf</code>、<code>jrose</code>、
+        <code>route</code>、<code>JSESSIONID</code>；</li>
+      <li>回到这里，把它们粘成 <code>key=value</code> 每行一个，点「生成 cookies.json」。</li>
+    </ol>
+    <textarea id="manual" placeholder="_uid=123456789
+UID=123456789
+fid=1234
+_d=xxxxxxxx
+uf=xxxxxxxx
+jrose=xxxxxxxx
+route=xxxxxxxx
+JSESSIONID=xxxxxxxx"></textarea>
+    <div style="margin-top:10px;">
+      <button class="primary" id="build">生成 cookies.json</button>
+      <button id="download">下载 cookies.json</button>
+      <button id="copyBtn">复制</button>
+    </div>
+    <div class="status" id="status">等待输入…</div>
+  </div>
+
+  <div class="card">
+    <h2>cookie 什么时候会失效</h2>
+    <p style="margin:0;">
+      学习通的登录态通常能撑几天到几周。程序发现被踢了会在日志里写
+      <code>登录态失效</code>，那时回来重新导一次就行。也可以在 <code>--status</code> 里看
+      <b>cookie 自检</b>那一行。
+    </p>
+  </div>
+
+  <div class="warn">
+    这是本地工具：cookie 只写进你自己电脑的文件。别把它贴到聊天群、别上传到任何网站。
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var lastJson = '';
+
+  function setStatus(text, kind) {
+    var s = $('status');
+    s.textContent = text;
+    s.className = 'status' + (kind ? ' ' + kind : '');
+  }
+
+  /** 把文本框里的 key=value 行解析成对象，顺手丢掉空行与注释 */
+  function parsePairs(text) {
+    var out = {};
+    String(text || '').split(/\r?\n/).forEach(function (line) {
+      line = line.trim();
+      if (!line || line.charAt(0) === '#') return;
+      var i = line.indexOf('=');
+      if (i <= 0) return;
+      var k = line.slice(0, i).trim();
+      var v = line.slice(i + 1).trim();
+      if (k && v) out[k] = v;
+    });
+    return out;
+  }
+
+  /** 常见但没用的 cookie，导出去只会让文件变脏 */
+  var DROP = ['webvpn_secure_fid', 'route2', 'Hm_lvt', 'Hm_lpvt'];
+
+  $('build').addEventListener('click', function () {
+    var obj = parsePairs($('manual').value);
+    DROP.forEach(function (k) { delete obj[k]; });
+    var keys = Object.keys(obj);
+    if (!keys.length) { setStatus('没解析到任何 key=value，检查一下格式', 'err'); return; }
+
+    lastJson = JSON.stringify({ exportedAt: new Date().toISOString(), cookies: obj }, null, 2);
+
+    var notes = [];
+    if (!obj._uid && !obj.UID) notes.push('⚠ 没有 _uid / UID：签到请求必须要它，请在 Application → Cookies 里找一下');
+    if (!obj.fid) notes.push('（提示）没有 fid：多数学校服务端会从登录态里取，一般也能签');
+    setStatus('已生成，共 ' + keys.length + ' 个 cookie：' + keys.join(', ') +
+      (notes.length ? '\n' + notes.join('\n') : ''), notes.length && !obj._uid && !obj.UID ? 'err' : 'ok');
+  });
+
+  $('download').addEventListener('click', function () {
+    if (!lastJson) { setStatus('先点「生成 cookies.json」', 'err'); return; }
+    var blob = new Blob([lastJson], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'cookies.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    setStatus('已下载 cookies.json，把它放到 auto-sign/ 目录下覆盖同名文件', 'ok');
+  });
+
+  $('copyBtn').addEventListener('click', function () {
+    if (!lastJson) { setStatus('先点「生成 cookies.json」', 'err'); return; }
+    navigator.clipboard.writeText(lastJson).then(function () {
+      setStatus('已复制到剪贴板', 'ok');
+    }, function () {
+      $('manual').value = lastJson;
+      setStatus('剪贴板不可用，已贴到上面的文本框里，手动复制', 'ok');
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "enabled": true,
+  "start_time": "08:00",
+  "end_time": "14:00",
+  "weekdays": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "start_point": {
+    "lat": null,
+    "lon": null,
+    "address": ""
+  },
+  "courses": [],
+  "name": "",
+  "uid": "",
+  "fid": "",
+  "max_rounds": 10,
+  "max_probe_m": 800,
+  "good_enough_m": 25,
+  "poll_seconds": 20,
+  "max_minutes_per_day": 180,
+  "stop_after_success": true
+}

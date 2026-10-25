@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "学习通自由选点签到",
+  "version": "1.3.0",
+  "description": "在超星/学习通网页端完成位置签到与拍照签到；自动签到会自己从课表读课程，不必先打开课程页面。",
+  "minimum_chrome_version": "111",
+  "permissions": ["storage", "activeTab", "scripting", "cookies", "alarms"],
+  "host_permissions": [
+    "*://*.chaoxing.com/*",
+    "*://*.chaoxing.com.cn/*",
+    "*://restapi.amap.com/*",
+    "*://*.openstreetmap.org/*"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.chaoxing.com/*", "*://*.chaoxing.com.cn/*"],
+      "js": ["src/injected.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": true,
+      "match_about_blank": true,
+      "match_origin_as_fallback": true
+    },
+    {
+      "matches": ["*://*.chaoxing.com/*", "*://*.chaoxing.com.cn/*"],
+      "js": ["src/lib.js", "src/map.js", "src/content.js"],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": true,
+      "match_origin_as_fallback": true
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_title": "学习通自由选点签到",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_ui": {
+    "page": "src/options.html",
+    "open_in_tab": true
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["src/injected.js", "src/lib.js", "src/map.js", "src/content.js"],
+      "matches": ["*://*.chaoxing.com/*", "*://*.chaoxing.com.cn/*"]
+    }
+  ]
+}

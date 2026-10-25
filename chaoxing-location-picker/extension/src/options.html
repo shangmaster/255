@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>自由选点签到 · 设置</title>
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; background: #f4f6fa; color: #1b1f24; font: 14px/1.6 -apple-system, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif; }
+    .wrap { max-width: 760px; margin: 28px auto 60px; padding: 0 18px; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .sub { color: #6b7787; font-size: 13px; margin-bottom: 18px; }
+    .card { background: #fff; border: 1px solid #e3e8f0; border-radius: 12px; padding: 16px 18px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(16,24,40,.04); }
+    .card h2 { font-size: 15px; margin: 0 0 12px; }
+    .row { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+    .row > label { width: 190px; flex: none; color: #3c4759; font-size: 13px; }
+    .row .hint { color: #6b7787; font-size: 12px; }
+    input[type=text], input[type=number], select, textarea { flex: 1; min-width: 0; padding: 7px 9px; border: 1px solid #cfd7e3; border-radius: 7px; font-size: 13px; background: #fff; }
+    textarea { min-height: 62px; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+    .sw { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    button { border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; background: #e9eef7; color: #22303f; }
+    button:hover { background: #dde5f3; }
+    button.primary { background: #2f6fed; color: #fff; font-weight: 600; }
+    button.primary:hover { background: #265fd0; }
+    .actions { display: flex; gap: 10px; align-items: center; }
+    .status { margin-top: 10px; font-size: 12px; background: #f2f5fa; border-radius: 8px; padding: 9px 10px; white-space: pre-wrap; word-break: break-all; min-height: 18px; }
+    .status.ok { background: #e6f7ed; color: #12683c; }
+    .status.err { background: #fdecec; color: #a3241f; }
+    code { background: #f2f5fa; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+    .note { font-size: 12px; color: #6b7787; }
+    .days { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+    .days label { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: #3c4759; }
+    #autoLog { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; line-height: 1.7; }
+    .courses { max-height: 210px; overflow: auto; border: 1px solid #e3e8f0; border-radius: 8px; padding: 8px 10px; }
+    .courses .c { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 3px 0; }
+    .courses .c code { font-size: 11px; color: #8a94a3; }
+    .courses .empty { font-size: 12.5px; color: #6b7787; }
+    .courses .warn { font-size: 12.5px; color: #a3241f; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>自由选点签到 · 设置</h1>
+  <div class="sub">用地图自由指定位置，完成学习通的位置签到。</div>
+
+  <div class="card">
+    <h2>一、伪装开关</h2>
+    <div class="row">
+      <label>总开关</label>
+      <div class="sw"><input type="checkbox" id="enabled" /> <span>开启后，学习通网页里的定位一律返回你选的坐标</span></div>
+    </div>
+    <div class="row">
+      <label>劫持 navigator.geolocation</label>
+      <div class="sw"><input type="checkbox" id="spoofGeo" /> <span>大部分 H5 定位走这里</span></div>
+    </div>
+    <div class="row">
+      <label>改写网络请求经纬度</label>
+      <div class="sw"><input type="checkbox" id="spoofTiles" /> <span>兜底方案：把请求里的 latitude/longitude 参数替换掉</span></div>
+    </div>
+    <div class="row">
+      <label>自动获取 activeId</label>
+      <div class="sw"><input type="checkbox" id="autoDetect" /> <span>从页面内容、网络请求里抓签到活动编号；抓不到就直接问当前课程的「活动列表」接口（每 30 秒重试一次，直到拿到为止）</span></div>
+    </div>
+    <div class="row">
+      <label>记录页面网络活动</label>
+      <div class="sw"><input type="checkbox" id="record" /> <span>旁路记录 chaoxing 域名的请求/响应（最多 40 条），用于找出 activeId 和排查问题</span></div>
+    </div>
+    <div class="row">
+      <label>试运行（不真正提交）</label>
+      <div class="sw"><input type="checkbox" id="dryRun" /> <span>只打印将要发送的请求，用于核对参数</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>二、自动签到（只做位置签到）</h2>
+    <div class="row">
+      <label>开启自动签到</label>
+      <div class="sw"><input type="checkbox" id="autoEnabled" /> <span>到点后自动去找「进行中」的位置签到并提交</span></div>
+    </div>
+    <div class="row">
+      <label>生效时段</label>
+      <div class="actions">
+        <input type="text" id="autoStart" style="width:100px;" placeholder="08:00" />
+        <span class="hint">到</span>
+        <input type="text" id="autoEnd" style="width:100px;" placeholder="14:00" />
+        <span class="hint">（也支持 8:00、0800、24:00）</span>
+      </div>
+    </div>
+    <div class="row" style="align-items:flex-start;">
+      <label>星期</label>
+      <div>
+        <div class="days" id="autoWeekdays">
+          <label><input type="checkbox" value="1" /> 周一</label>
+          <label><input type="checkbox" value="2" /> 周二</label>
+          <label><input type="checkbox" value="3" /> 周三</label>
+          <label><input type="checkbox" value="4" /> 周四</label>
+          <label><input type="checkbox" value="5" /> 周五</label>
+          <label><input type="checkbox" value="6" /> 周六</label>
+          <label><input type="checkbox" value="0" /> 周日</label>
+        </div>
+        <div class="actions" style="margin-top:6px;">
+          <button id="daysWork">工作日（一至五）</button>
+          <button id="daysAll">每天</button>
+          <button id="daysNone">全不选</button>
+        </div>
+        <div class="note">全不选等于每天都跑。默认是周一到周五。</div>
+      </div>
+    </div>
+    <div class="row">
+      <label>查询间隔（秒）</label>
+      <input type="number" id="autoInterval" min="10" max="600" step="5" style="max-width:120px;" />
+      <span class="hint">时段内多久查一次课程活动，默认 20 秒（Chrome 定时器最短 30 秒一次，内部会自动续排）</span>
+    </div>
+    <div class="row">
+      <label>单次最多提交几次</label>
+      <input type="number" id="autoRounds" min="1" max="30" step="1" style="max-width:120px;" />
+      <span class="hint">离签到地点太远时，靠每次返回的距离做三点定位逼近，默认 10 次</span>
+    </div>
+    <div class="row">
+      <label>签上之后</label>
+      <div class="sw"><input type="checkbox" id="autoStop" /> <span>这一天的课程不再继续查（关掉就继续盯着，防止老师又发一次）</span></div>
+    </div>
+    <div class="row">
+      <label>起始位置</label>
+      <div class="actions">
+        <button id="useCurrentPoint">用当前选点作为起始点</button>
+        <span class="hint" id="autoPointHint">未设置</span>
+      </div>
+    </div>
+    <div class="row" style="align-items:flex-start;">
+      <label>监控的课程</label>
+      <div style="flex:1; min-width:0;">
+        <div class="actions" style="margin-bottom:8px;">
+          <button id="fetchCourses">从课表读取我的课程</button>
+          <button id="clearCourses">改为自动（全部课程）</button>
+        </div>
+        <div id="courseList" class="courses">正在读取…</div>
+        <div class="note" style="margin-top:6px;">
+          留空 = 自动监控全部课程（后台自己从课表接口拉，不需要你打开课程页面）。<br />
+          只想盯几门就勾上对应的课，查询更少、更不容易打扰服务端。
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      只会自动处理<b>位置签到</b>。识别成普通 / 二维码 / 签到码 / 手势 / 要人脸 / 要拍照的，
+      只写一条日志说明"检测到了但不处理"，不会提交、不会重试。<br />
+      位置签到如果因为离签到地点太远被拒，会把返回的距离当测量值，用三点定位算出签到点再试，
+      直到签上或判明不是距离问题。
+    </div>
+    <div class="actions" style="margin-top:10px;">
+      <button class="primary" id="autoSave">保存并启用</button>
+      <button id="autoRunNow">立刻跑一轮</button>
+      <button id="autoReset">重置今天的记录</button>
+      <button id="autoRefresh">刷新状态</button>
+    </div>
+    <div class="status" id="autoStatus">未启用</div>
+    <div class="status" id="autoLog" style="max-height:240px; overflow:auto; white-space:pre-wrap;"></div>
+  </div>
+
+  <div class="card">
+    <h2>三、坐标系</h2>
+    <div class="row">
+      <label>选点坐标系</label>
+      <select id="datum">
+        <option value="gcj02">GCJ-02（高德 / 腾讯 / 国内地图，推荐）</option>
+        <option value="wgs84">WGS-84（GPS 原始坐标）</option>
+        <option value="bd09">BD-09（百度地图）</option>
+      </select>
+    </div>
+    <div class="note">提交给学习通时会统一换算成 GCJ-02（国内地图坐标），所以这里选你觉得方便的输入方式即可。</div>
+    <div class="row" style="margin-top:12px;">
+      <label>默认缩放级别</label>
+      <input type="number" id="defaultZoom" min="3" max="19" step="1" />
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>四、地图瓦片</h2>
+    <div class="row">
+      <label>瓦片地址模板</label>
+      <input type="text" id="tileUrl" />
+    </div>
+    <div class="row">
+      <label>子域名</label>
+      <input type="text" id="tileSubdomains" placeholder="1,2,3,4" />
+      <span class="hint">用 <code>{s}</code> 占位</span>
+    </div>
+    <div class="row">
+      <label></label>
+      <div class="actions">
+        <button id="resetTiles">恢复默认（高德）</button>
+        <button id="osmTiles">换成 OpenStreetMap</button>
+      </div>
+    </div>
+    <div class="note">模板里可用 <code>{x}</code> <code>{y}</code> <code>{z}</code> <code>{s}</code>。若瓦片加载不出来，地图会自动退化为网格底图，选点功能不受影响。</div>
+  </div>
+
+  <div class="card">
+    <h2>五、请求参数</h2>
+    <div class="row">
+      <label>appType</label>
+      <input type="text" id="appType" />
+      <span class="hint">默认 15（网页端）</span>
+    </div>
+    <div class="row">
+      <label>ifTiJiao</label>
+      <input type="text" id="ifTiJiao" />
+      <span class="hint">默认 1</span>
+    </div>
+    <div class="row">
+      <label>高德 Web 服务 key</label>
+      <input type="text" id="amapKey" placeholder="可选，用于地址搜索 / 坐标转地址" />
+    </div>
+    <div class="note">不填 key 时，地址搜索会退回 OpenStreetMap 的免费接口（中文支持一般）。</div>
+  </div>
+
+  <div class="card">
+    <h2>六、连通性自检</h2>
+    <div class="actions">
+      <button class="primary" id="testLogin">检查登录状态</button>
+      <button id="testReach">检查接口可达性</button>
+      <button id="testPan">检查图片上传通道</button>
+    </div>
+    <div class="status" id="testStatus">未检测</div>
+    <div class="note">「检查登录状态」会访问学习通账号页，确认当前浏览器已登录；「检查接口可达性」访问签到接口但不带参数，用来确认网络通不通；「检查图片上传通道」确认能拿到网盘上传令牌（拍照签到要先上传图片换 objectId）。</div>
+  </div>
+
+  <div class="card">
+    <h2>七、当前选点</h2>
+    <div class="row">
+      <label>坐标</label>
+      <input type="text" id="curPoint" placeholder="30.123456, 120.123456" />
+      <button id="savePoint">保存</button>
+    </div>
+    <div class="row">
+      <label>签到地址文本</label>
+      <input type="text" id="curAddr" placeholder="例如：XX大学 图书馆" />
+      <button id="saveAddr">保存</button>
+    </div>
+    <div class="actions" style="margin-top:6px;">
+      <button id="clearPoint">清除选点</button>
+      <button id="clearPresets">清空常用点</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="save">保存设置</button>
+    <span class="status" id="saveStatus" style="flex:1;"></span>
+  </div>
+</div>
+
+<script src="lib.js"></script>
+<script src="auto.js"></script>
+<script src="options.js"></script>
+</body>
+</html>
